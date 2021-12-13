@@ -14,19 +14,29 @@
 
 -->
 	<script>
-	function loadURL(url,divID) {
-		fetch(url)
+		// 按下button 
+		// 跟server request
+	function loadList() {
+		fetch("todoControlAjax.php?act=getList")
 		.then(function(resp){
 			//console.log(resp);
-			return resp.text();
+			// 內容轉為json物件
+			return resp.json();
 		})
-		.then(function(text) {
-			if (text){
-				el = document.getElementById(divID);
-				el.innerHTML=text;
+		.then(function(json) {
+			if (json){
+				// 將json物件轉為表格
+				let tableStr = "<table border='1'>";
+				for(let row of json){
+					tableStr+= "<tr><td>"+row['title'];
+					tableStr+= "</td><td>"+row['note'];
+					tableStr+= "</td><tr>";
+				}
+				tableStr += "</table>";
+				document.getElementById("main").innerHTML=tableStr;
 			}
 		})
-		document.getElementById(divID).innerHTML="my name is JC";
+		
 	}
 
 	function postData(url,keyword) {
@@ -107,12 +117,6 @@
 		// Append the result into #root element
 		document.getElementById(divID).innerHTML = table;
 	}
-
-	function loadPage() {
-		let url=document.getElementById('myurl').value;
-		//console.log(url);
-		loadURL(url, 'main');
-	}
 	
 	function loadJSON() {
 		let keyw=document.getElementById('myurl').value;
@@ -121,17 +125,9 @@
 	</script>
   </head>
   <body>
-  URL: <select id='xurl' onchage="loadPage()">
-  <option value='1.php'>page 1</option>
-  <option value='2.php?f=1.jpg'>page 2:1.jpg</option>
-  <option value='2.php?f=2.jpg'>page 2:2.jpg</option>
-  </select>
-  
-  <a href="javascript:loadPage()">loadPage</a>
-  <a href="#" onclick="loadPage()">loadPage</a>
-  <input id="myurl" type='text'> <button onclick="loadPage()">load url</button>
-<button onclick="loadJSON()">load json to table</button>
-<!-- main working div-->
-<div id="main">hello</div>
+	  <button onclick="loadList()">列出代辦事項</button>
+	  <button onclick="loadAddForm()">新增工作</button>
+  <!-- working main div -->
+<div id = "main">hello</div>
 </body>
 </html>
