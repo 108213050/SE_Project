@@ -8,7 +8,10 @@
 <fieldset>
 	<legend>app</legend>
 <div id="app">
+	<!-- vue framwork定義: 連結到這個資料標籤 -->
   {{ message }}
+  {{ title }}
+  <input type="text" v-bind:value='message'>
 </div>
 </fieldset>
 
@@ -92,15 +95,20 @@
 const vm1= Vue.createApp({
 	data() {
 		return {
-			message: 'Hello Vue!'
+			message: 'Hello Vue!',
+			title: 123
 		}
 	}
 }).mount('#app');
 
+// #:id,.:class
+// mount: 綁定到這個顯示元件上
 const vm2= Vue.createApp({
 	data() {
 		return {
+			// 資料物件標籤: message
 			message: 'You loaded this page on ' + new Date().toLocaleString()
+			
 		}
 	}
 }).mount('#app-2');
