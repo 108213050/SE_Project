@@ -30,13 +30,35 @@
 				for(let row of json){
 					tableStr+= "<tr><td>"+row['title'];
 					tableStr+= "</td><td>"+row['note'];
-					tableStr+= "</td><tr>";
+					//點選已完成按鈕: 取出他這個row(工作)的值
+					tableStr+= "</td><td><button onclick='setJobDone("+row['id']+")'>已完成</button></td><tr>";
 				}
 				tableStr += "</table>";
 				document.getElementById("main").innerHTML=tableStr;
 			}
 		})
 		
+	}
+	// 設置job finish
+	function setJobDone(id){
+		// alert(id);
+		// &id= id: 傳入參數
+		// 因為setFinish(id): 需要傳入id參數
+		fetch("todoControlAjax.php?act=setFinish&id="+id)
+		.then(function(resp){
+			//console.log(resp);
+			// 內容轉為json物件
+			return resp.text();
+		})
+		.then(function(rr) {
+			if (rr){
+				// 將json物件轉為表格
+				console.log("ok");
+				// 更新表單
+				loadList();
+
+			}
+		})
 	}
 
 	function postData(url,keyword) {
@@ -125,6 +147,7 @@
 	</script>
   </head>
   <body>
+	  <!-- server端request出來 -->
 	  <button onclick="loadList()">列出代辦事項</button>
 	  <button onclick="loadAddForm()">新增工作</button>
   <!-- working main div -->

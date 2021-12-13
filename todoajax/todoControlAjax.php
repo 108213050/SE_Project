@@ -33,6 +33,7 @@ switch ($act) {
 		// 2: type = 2 ，未完成 
 		$list = getJobList(2);
 		// 將清單轉為json
+		// 給client端出裡
 		echo json_encode($list);
 		break;
 
