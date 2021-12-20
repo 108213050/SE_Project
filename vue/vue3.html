@@ -11,7 +11,9 @@
 	<!-- vue framwork定義: 連結到這個資料標籤 -->
   {{ message }}
   {{ title }}
-  <input type="text" v-bind:value='message'>
+  <!-- <input type="text" v-bind:value='message'> -->
+  <input type="text" v-model='title'>
+  <div>{{title}}</div>
 </div>
 </fieldset>
 
@@ -29,7 +31,9 @@
 	<legend>app-3</legend>
 <div id="app-3">
   <span v-if="seen">Now you see me</span>
+  <button v-on:click="toggleInside">切換</button>
 </div>
+<!-- <button onclick="toggle()">切換</button> -->
 </fieldset>
 
 <fieldset>
@@ -37,6 +41,7 @@
 <div id="app-4">
   <ol>
     <li v-for="todo in todos">
+		<!-- todos裡的 每一項:todo -->
       {{ todo.text }}
     </li>
   </ol>
@@ -56,17 +61,17 @@
 <div id="app-6">
   <p>{{ message }}</p>
   <input v-model="message">
-<!--  	<div v-for="(value, key, index) in dat">
-		{{ index }} -- {{ key }}: {{ value }} -->
+  <button v-on:click="loadData">load json to app-6 </button>
+ 	<div v-for="(value, key, index) in dat">
+		{{ index }} -- {{ key }}: {{ value }}
 	<br>
-	<div v-for="value in dat">
+	<!-- <div v-for="value in dat">
 	  <ol>
 	{{ value }}
-	  </ol>
+	</ol> -->
 
-	</div>
+</div>
 
-<button onclick="loadData()">load json to app-6 </button>
 
 </div>
 </fieldset>
@@ -81,8 +86,27 @@
       We also need to provide each component with a "key",
       which will be explained later.
     -->
-    <todo-item
+	<!-- 自己定義新的tag -->
+    <!-- 綁定資料
+		v-bind:todo="item"
+      v-bind:key="item.id": 可綁可怖綁 -->
+	<todo-item
       v-for="item in groceryList"
+	  
+      v-bind:todo="item"
+      v-bind:key="item.id">
+    </todo-item>
+
+	<todo-item
+      v-for="item in groceryList1"
+	  
+      v-bind:todo="item"
+      v-bind:key="item.id">
+    </todo-item>
+
+	<todo-item
+      v-for="item in groceryList2"
+	  
       v-bind:todo="item"
       v-bind:key="item.id">
     </todo-item>
@@ -91,7 +115,10 @@
 </fieldset>
 
 <script language="javascript">
-
+// 全域function
+function toggle(){
+	vm3.seen = ! vm3.seen;
+}
 const vm1= Vue.createApp({
 	data() {
 		return {
@@ -100,14 +127,14 @@ const vm1= Vue.createApp({
 		}
 	}
 }).mount('#app');
-
+// #代表顯示元件
 // #:id,.:class
 // mount: 綁定到這個顯示元件上
 const vm2= Vue.createApp({
 	data() {
 		return {
 			// 資料物件標籤: message
-			message: 'You loaded this page on ' + new Date().toLocaleString()
+			message: 'You 可綁ed this page on ' + new Date().toLocaleString()
 			
 		}
 	}
@@ -117,6 +144,13 @@ const vm3= Vue.createApp({
 	data() {
 		return {
 			seen: true
+		}
+	},
+	methods: {
+		// 型態為函數
+		toggleInside: function () {
+			// this.message : 這個createApp底下的message
+			this.seen = ! this.seen;
 		}
 	}
 }).mount("#app-3");
@@ -130,7 +164,8 @@ const vm4= Vue.createApp({
 				{ text: 'Build something awesome' }
 			]
 		}
-	}
+	},
+	
 }).mount("#app-4");
 
 vm4.todos.push({ text: 'New item' })
@@ -141,8 +176,11 @@ const vm5= Vue.createApp({
 			message: 'Hello Vue.js!'
 		}
 	},
+	// 定義物件屬性
 	methods: {
+		// 型態為函數
 		reverseMessage: function () {
+			// this.message : 這個createApp底下的message
 			this.message = this.message.split('').reverse().join('')
 		}
 	}
@@ -155,6 +193,23 @@ const vm6= Vue.createApp({
 			message: 'Hello Vue!',
 			dat: []
 		}
+	},
+	methods:{
+		loadData:function(){
+			//還在app範疇內先儲存this 代表app本身
+			// 才找的到app底下的dat 
+			const that = this;
+			fetch('json.php')
+			.then(function(response) {
+				return response.json();
+			})
+			.then(function(myJson) {
+				// vm6.dat = myJson;
+				// this=fetch裡面
+				that.dat = myJson;
+				
+			});
+		}
 	}
 }).mount("#app-6");
 
@@ -163,33 +218,47 @@ const vm6= Vue.createApp({
 const vm7= Vue.createApp({
   data() {
 	return {
+		// 陣列名稱:groceryList
 		groceryList: [
 		  { id: 0, text: 'Vegetables' },
 		  { id: 1, text: 'Cheese' },
 		  { id: 2, text: 'Whatever else humans are supposed to eat' }
+		],
+		groceryList1: [
+		  { text: 'John' },
+		  { text: 'Jack' },
+		  { text: 'Alice' }
+		],
+		groceryList2: [
+		  { text: 'Apple' },
+		  { text: 'banana' },
+		  { text: 'Watermelon' }
 		]
 	}
   }
 })
+// 新增標籤名稱: 
 vm7.component('todo-item', {
   // The todo-item component now accepts a
   // "prop", which is like a custom attribute.
   // This prop is called todo.
+  //資料屬性 資料元件 
   props: ['todo'],
+//   依照定義方式展開來
   template: '<li>{{ todo.text }}</li>'
 })
 vm7.mount("#app-7")
 
 //load json from website, then deploy it into div
-function loadData() {
-fetch('json.php')
-  .then(function(response) {
-    return response.json();
-  })
-  .then(function(myJson) {
-	vm6.dat = myJson;
-  });
-}
+// function loadData() {
+// fetch('json.php')
+//   .then(function(response) {
+//     return response.json();
+//   })
+//   .then(function(myJson) {
+// 	vm6.dat = myJson;
+//   });
+// }
 </script>
 
 </body></html>
