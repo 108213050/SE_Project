@@ -74,5 +74,5 @@ function baseOBJ() {
 		} //end if
 	} //end loadrecord
 } //end of baseObj function
-var baseObj=new baseOBJ();
-baseObj.loadRecord(1,'main')
+// var baseObj=new baseOBJ();
+// baseObj.loadRecord(1,'main')
