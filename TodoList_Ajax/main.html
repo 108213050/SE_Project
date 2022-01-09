@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AJAX example</title>
+
+    <!-- import CSS 
+    <link rel="stylesheet" href="js/jquery-ui.min.css">
+    <style>
+    </style>
+	<script src="js/vue.global.prod.js"></script>
+
+-->
+	<script>
+		// 按下button 
+		// 跟server request
+	function loadList(id) {
+		let status = id
+		fetch("todoControlAjax.php?act=getList&id="+id)
+		.then(function(resp){
+			//console.log(resp);
+			// 內容轉為json物件
+			return resp.json();
+		})
+		.then(function(json) {
+			if (json){
+				// 將json物件轉為表格
+				// 如果已經完成了
+				let tableStr=""
+				if(status==1){
+					tableStr += "<h2>Finished List</h2><table border='1' cellpadding=\"5\" bgcolor=\"white\"><tr><th>title</th><th>note</th><th>start time</th>";
+					tableStr+="<th>Finish Time</th></tr>";
+				}else if(status==2){
+					//尚未完成的工作清單
+					tableStr += "<h2>Todo List</h2><table border='1' cellpadding=\"5\" bgcolor=\"white\"><tr><th>title</th><th>note</th><th>start time</th>";
+					tableStr+="<th>Button</th></tr>";
+				}else{
+					// 列出全部
+					tableStr += "<h2>All List</h2><table border='1' cellpadding=\"5\" bgcolor=\"white\"><tr><th>title</th><th>note</th><th>start time</th><th>Finish Time or Button</th></tr>";
+				}
+				for(let row of json){
+					tableStr+= "<tr><td>"+row['title'];
+					tableStr+= "</td><td>"+row['note'];
+					tableStr+= "</td><td>"+row['start'];
+					//點選已完成按鈕: 取出他這個row(工作)的值
+					// 假設這是已完成事項
+					if(status == 1){
+						tableStr+="</td><td>"+row['finish']+"</td><tr>";
+					}else if(status==2){
+						tableStr+= "</td><td><button onclick='setJobDone("+status+","+row['id']+")'>已完成</button></td><tr>";
+					}else{
+						// 列出全部
+						// 已完成
+						if(row['finish'] != null){
+							tableStr+="</td><td>"+row['finish']+"</td><tr>";
+						// 未完成
+						}else{
+							tableStr+= "</td><td><button onclick='setJobDone("+status+","+row['id']+")'>已完成</button></td><tr>";
+					}
+				}
+				}
+				tableStr += "</table>";
+				
+				document.getElementById("main").innerHTML=tableStr;
+				}
+			
+			// json2table(json,'main');
+		})
+		
+	}
+	// 設置job finish
+	function setJobDone(status,id){
+		// alert(id);
+		// &id= id: 傳入參數
+		// 因為setFinish(id): 需要傳入id參數
+		fetch("todoControlAjax.php?act=setFinish&id="+id)
+		.then(function(resp){
+			//console.log(resp);
+			// 內容轉為json物件
+			return resp.text();
+		})
+		.then(function(rr) {
+			if (rr){
+				// 將json物件轉為表格
+				console.log("ok");
+				// 更新表單
+				if (status ==0){
+					loadList(0);
+				}else{
+					loadList(2);
+				}
+
+			}
+		})
+	}
+	// 設置job finish
+	function AddJob(){
+		// alert(id);
+		// &id= id: 傳入參數
+		// 因為setFinish(id): 需要傳入id參數
+		let title = document.getElementById("title").value	
+		let note = document.getElementById("note").value
+		console.log("title",title);
+		console.log(note);
+		
+		let mydat = new FormData();
+		mydat.append( "title",title);
+		mydat.append( "note",note);
+		fetch("todoControlAjax.php?act=addJob",{
+			method: 'POST',
+			body:mydat
+		})
+		.then(function(resp){
+			//console.log(resp);
+			// 內容轉為json物件
+			return resp.text();
+		})
+		.then(function(rr) {
+			if (rr){
+				// 將json物件轉為表格
+				console.log("ok");
+				// 更新表單
+				loadList(2);
+			}
+		})
+	}
+	// 載入新的填入表單
+	function loadAddForm(){
+		// 將json物件轉為表格
+		let tableStr = "<table id='addForm' border='2' bdcolor='honeydew'; >";
+		tableStr+="<tr><th>title</th><th>note</th><th></th></tr>";
+		tableStr+= "<tr><td><input name=\"title\" type=\"text\" id=\"title\" />";
+		tableStr+= "</td><td><input name=\"note\" type=\"text\" id=\"note\" />";
+		//點選已完成按鈕: 取出他這個row(工作)的值
+		tableStr+= "</td><td><button onclick='AddJob()'>add job</button></td>";
+		tableStr+= "</td><td><button onclick='CancelAJ()'>取消新增</button></td><tr>";
+		tableStr += "</table>";
+		document.getElementById("addForm").innerHTML=tableStr;
+	}
+	function CancelAJ(){
+		document.getElementById("addForm").innerHTML= "";
+	}
+	</script>
+	
+  </head>
+  <body style="background-color: darkkhaki; ">
+	<!-- server端request出來 -->
+	<div id="contianer" >
+		<!-- 新增的表單 -->
+		<h1 style="color: darkblue;">To do List</h1>
+		<div id="NewJb" style="margin: auto;">
+			<button onclick="loadAddForm()">新增工作</button>
+			<div id="addForm">
+			</div>
+			</div>
+		<div id = "select">
+			<button onclick="loadList(0)">列出全部</button>
+			<button onclick="loadList(2)">列出代辦事項</button>
+			<button onclick="loadList(1)">列出已完成事項</button>
+			<!-- working main div -->
+		</div>	
+		
+		<!-- 清單列表 -->
+		<div id = "main">
+		</div>
+	</div>
+</body>
+</html>
